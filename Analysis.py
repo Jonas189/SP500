@@ -28,21 +28,21 @@ pd.set_option('display.max_columns', None)
 
 # extract first row
 ticker = df["Symbol"]
-# print(ticker)
+#print(ticker)
 ticker_as_list = ticker.tolist()
-print(ticker_as_list)
+#print(ticker_as_list)
 
 # Import Stock Data from Yahoo
 
 start_date = '2023-01-01'
 end_date = '2023-04-01'
-G_data = yf.download(ticker_as_list, start_date, end_date)
-G_data["Date"] = G_data.index
-G_data = G_data[["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"]]
-G_data.reset_index(drop=True, inplace=True)
+SP500 = yf.download(ticker_as_list, start_date, end_date)
+SP500["Date"] = SP500.index
+SP500 = SP500[["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"]]
+SP500.reset_index(drop=True, inplace=True)
 
 pd.set_option('display.max_columns', None)
-print(G_data.tail())
-#G_data.to_csv("GOOGL.csv")
+#print(SP500.tail())
+SP500.to_csv("S&P500.csv")
 
 
