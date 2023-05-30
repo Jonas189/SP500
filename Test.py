@@ -24,3 +24,4 @@ df.iloc[:,1] = df.iloc[:,1].apply(lambda x: x / abs(max(df.iloc[:,1])))
 
 print(df)
 
+print(list(df.columns))
