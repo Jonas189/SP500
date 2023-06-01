@@ -1,4 +1,3 @@
-
 # Import Libraries
 
 import numpy as np
@@ -16,7 +15,7 @@ from bokeh.models import DatetimeTickFormatter
 from math import pi
 from bokeh.models import HoverTool
 from bokeh.plotting import ColumnDataSource
-
+from bokeh.palettes import Spectral11
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -54,14 +53,12 @@ start_date = '2020-05-01'
 end_date = '2021-05-01'
 SP500 = yf.download(random_ticker_as_list, start_date, end_date)
 SP500["Date"] = SP500.index
-SP500 = SP500[["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"]]
+SP500 = SP500[["Date", "Open"]]
 SP500.reset_index(drop=True, inplace=True)
 
 pd.set_option('display.max_columns', None)
 #print(SP500.tail)
 #SP500.to_csv("S&P500.csv")
-
-#SP500 = pd.read_csv("S&P500.csv")
 
 # Normalize Data
 SP500.iloc[:,1] = SP500.iloc[:,1].apply(lambda x: x / abs(max(SP500.iloc[:,1])))
@@ -79,11 +76,13 @@ SP500.iloc[:,9] = SP500.iloc[:,9].apply(lambda x: x / abs(max(SP500.iloc[:,9])))
 
 #print(SP500.tail())
 
+
+
+
 # Visualization
 SP500.index = SP500.index.astype(str)
 column_header = (list(SP500.columns))
-p = figure(title = "S&P500 Example", x_axis_label = 'Time', x_axis_type="datetime", y_axis_label = 'Scaled Prices',width=800, tools='hover, pan, zoom_out, zoom_in, reset, crosshair')
-formatters={'x': 'datetime'}
+p = figure(title = "S&P500 Example", x_axis_label = 'Time', x_axis_type="datetime", y_axis_label = 'Scaled Prices',width=800, tools = "pan, hover")
 p.line(SP500.iloc[:,0], SP500.iloc[:,1], legend_label = str((column_header[1][1])), color ="red", line_width = 2)
 p.line(SP500.iloc[:,0], SP500.iloc[:,2], legend_label = str((column_header[2][1])), color ="green", line_width = 2)
 p.line(SP500.iloc[:,0], SP500.iloc[:,3], legend_label = str((column_header[3][1])), color ="blue", line_width = 2)
@@ -108,6 +107,75 @@ p.legend.border_line_width = 3
 p.legend.border_line_color = "black"
 p.legend.click_policy = "hide"
 
+print((SP500))
+
+
+
+
+
+
+
+a = (column_header[1][1])
+b = SP500.iloc[:,0]
+c = SP500.iloc[:,1]
+
+#a_as_list = a.tolist()
+b_as_list = b.tolist()
+c_as_list = c.tolist()
+
+p.add_tools(HoverTool(
+    tooltips=[
+        ( 'date',   "b_as_list"),
+        ( 'close',  "c_as_list" ), # use @{ } for field names with spaces
+    ],
+
+    formatters={
+        'date'      : 'datetime', # use 'datetime' formatter for 'date' field
+    },
+
+    # display a tooltip whenever the cursor is vertically in line with a glyph
+    mode='vline'
+))
+
 show(p)
+
+#print(b_as_list)
+
+#n_source = zip(b_as_list, c_as_list)
+#new = pd.DataFrame(list(n_source))
+#new["Ticker"] = a
+#new.columns = ["Date", "Opening_Value", "Ticker"]
+#new_right_order = new.iloc[:, [2, 0, 1]]
+
+
+
+
+#b = figure(title = "S&P500 Example", x_axis_label = 'Time', x_axis_type="datetime", y_axis_label = 'Scaled Prices',width=800, tools='hover')
+#b.line(concat_df.iloc[:,0], concat_df[:,1], legend_label = str((column_header[1][1])), color ="red", line_width = 2)
+
+
+
+
+
+
+#for index in range(len(SP500)):
+
+#new_df = pd.DataFrame(empty_list, columns=["Date", "Name", "Value"])
+#print(new_df)
+
+
+source = ColumnDataSource(data=dict(x=b, y=c))
+
+TOOLTIPS = [
+        ("index", "$index"),
+        ("Date", "$x"),
+        ("Value", "$y"),
+]
+
+c = figure(width=400, height=400,
+           title="Mouse over the dots", tooltips=TOOLTIPS)
+c.line('x', 'y', source=source)
+
+#show(c)
 
 
