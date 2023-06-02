@@ -1,3 +1,4 @@
+
 # Import Libraries
 
 import numpy as np
@@ -15,7 +16,7 @@ from bokeh.models import DatetimeTickFormatter
 from math import pi
 from bokeh.models import HoverTool
 from bokeh.plotting import ColumnDataSource
-from bokeh.palettes import Spectral11
+
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -53,12 +54,14 @@ start_date = '2020-05-01'
 end_date = '2021-05-01'
 SP500 = yf.download(random_ticker_as_list, start_date, end_date)
 SP500["Date"] = SP500.index
-SP500 = SP500[["Date", "Open"]]
+SP500 = SP500[["Date", "Close", "Volume", "High", "Low", "Open", "Adj Close"]]
 SP500.reset_index(drop=True, inplace=True)
 
 pd.set_option('display.max_columns', None)
 #print(SP500.tail)
 #SP500.to_csv("S&P500.csv")
+
+#SP500 = pd.read_csv("S&P500.csv")
 
 # Normalize Data
 SP500.iloc[:,1] = SP500.iloc[:,1].apply(lambda x: x / abs(max(SP500.iloc[:,1])))
@@ -76,13 +79,11 @@ SP500.iloc[:,9] = SP500.iloc[:,9].apply(lambda x: x / abs(max(SP500.iloc[:,9])))
 
 #print(SP500.tail())
 
-
-
-
 # Visualization
 SP500.index = SP500.index.astype(str)
 column_header = (list(SP500.columns))
-p = figure(title = "S&P500 Example", x_axis_label = 'Time', x_axis_type="datetime", y_axis_label = 'Scaled Prices',width=800, tools = "pan, hover")
+p = figure(title = "S&P500 Example", x_axis_label = 'Time', x_axis_type="datetime", y_axis_label = 'Scaled Prices',width=800, tools='hover, pan, zoom_out, zoom_in, reset, crosshair')
+formatters={'x': 'datetime'}
 p.line(SP500.iloc[:,0], SP500.iloc[:,1], legend_label = str((column_header[1][1])), color ="red", line_width = 2)
 p.line(SP500.iloc[:,0], SP500.iloc[:,2], legend_label = str((column_header[2][1])), color ="green", line_width = 2)
 p.line(SP500.iloc[:,0], SP500.iloc[:,3], legend_label = str((column_header[3][1])), color ="blue", line_width = 2)
@@ -107,75 +108,53 @@ p.legend.border_line_width = 3
 p.legend.border_line_color = "black"
 p.legend.click_policy = "hide"
 
-print((SP500))
-
-
-
-
-
-
-
-a = (column_header[1][1])
-b = SP500.iloc[:,0]
-c = SP500.iloc[:,1]
-
-#a_as_list = a.tolist()
-b_as_list = b.tolist()
-c_as_list = c.tolist()
-
-p.add_tools(HoverTool(
-    tooltips=[
-        ( 'date',   "b_as_list"),
-        ( 'close',  "c_as_list" ), # use @{ } for field names with spaces
-    ],
-
-    formatters={
-        'date'      : 'datetime', # use 'datetime' formatter for 'date' field
-    },
-
-    # display a tooltip whenever the cursor is vertically in line with a glyph
-    mode='vline'
-))
-
 show(p)
 
-#print(b_as_list)
-
-#n_source = zip(b_as_list, c_as_list)
-#new = pd.DataFrame(list(n_source))
-#new["Ticker"] = a
-#new.columns = ["Date", "Opening_Value", "Ticker"]
-#new_right_order = new.iloc[:, [2, 0, 1]]
-
+# Basic mean - variance analysis
+#log_return
+for i in range(1,10):
+    SP500['pct_change', column_header[i][1] ] = SP500.iloc[:,i].pct_change()
+for i in range(1, 10):
+    SP500['log_ret', column_header[i][1]] = np.log(SP500.iloc[:,i]) - np.log(SP500.iloc[:,i].shift(1))
 
 
+#Average_Price
+n1 = 10
+for i in range(1,10):
+    SP500['cumvol', column_header[i][1]] = SP500.iloc[:,n1].cumsum()
+    n1 += 1
+for i in range(1,10):
+    SP500["WMA Price", column_header[i][1]] = SP500.iloc[0:1, i]
 
-#b = figure(title = "S&P500 Example", x_axis_label = 'Time', x_axis_type="datetime", y_axis_label = 'Scaled Prices',width=800, tools='hover')
-#b.line(concat_df.iloc[:,0], concat_df[:,1], legend_label = str((column_header[1][1])), color ="red", line_width = 2)
+n2 = 10
+n3 = 73
+n4 = 82
+n5 = 1
+for n in range(1,10):
+    for i in range(1,len(SP500)):
+        if SP500.iloc[i, n2] == 0:
+            # take previous row value
+            SP500.iloc[i, n4] = SP500.iloc[i-1, n4]
+        elif SP500.iloc[i, n2] > 0:
+            # calculate new average
+            SP500.iloc[i, n4] = ((SP500.iloc[i-1, n3]*SP500.iloc[i-1, n4]) + (SP500.iloc[i, n2]*SP500.iloc[i, n5])) / (SP500.iloc[i, n3])
+        elif (SP500.iloc[i, n2] < 0) & (SP500.iloc[i, n3] > 0):
+            # take previous row value
+            SP500.iloc[i, n4] = SP500.iloc[i-1, n4]
+        else:
+            # vol < 0 and cumsum = 0
+            SP500.iloc[i, n4] = 0
+    n2 += 1
+    n3 += 1
+    n4 += 1
+    n5 += 1
+
+SP500.to_csv("S&P500.csv")
+print(SP500)
+
+#Standard Deviation
 
 
-
-
-
-
-#for index in range(len(SP500)):
-
-#new_df = pd.DataFrame(empty_list, columns=["Date", "Name", "Value"])
-#print(new_df)
-
-
-source = ColumnDataSource(data=dict(x=b, y=c))
-
-TOOLTIPS = [
-        ("index", "$index"),
-        ("Date", "$x"),
-        ("Value", "$y"),
-]
-
-c = figure(width=400, height=400,
-           title="Mouse over the dots", tooltips=TOOLTIPS)
-c.line('x', 'y', source=source)
-
-#show(c)
+print(SP500.iloc[: , 82].std())
 
 
