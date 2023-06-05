@@ -18,7 +18,6 @@ SP500.drop(columns=SP500.columns[0], axis=1, inplace=True)
 SP500 = SP500.set_index(["Date"])
 #SP500.reset_index(drop=True, inplace=True)
 pd.set_option('display.max_columns', None)
-SP500.to_csv("S&P5002.csv")
 #print(SP500)
 
 f = open('Stock_Count.txt', 'r')
