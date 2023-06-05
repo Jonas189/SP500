@@ -7,6 +7,7 @@ from datetime import timedelta
 import pandas as pd
 import yfinance as yf
 import requests
+import math
 
 import bokeh
 from bokeh.plotting import figure
@@ -17,8 +18,6 @@ from math import pi
 from bokeh.models import HoverTool
 from bokeh.plotting import ColumnDataSource
 
-
-from sklearn.preprocessing import MinMaxScaler
 
 # Set individual
 
@@ -34,19 +33,14 @@ html = requests.get(url).content
 df_list = pd.read_html(html)
 df = df_list[0]
 pd.set_option('display.max_columns', None)
-#print(df)
-#df.to_csv('my data.csv')
 
 # extract first row
 ticker = df["Symbol"]
-#print(ticker)
 ticker_as_list = ticker.tolist()
-#print(ticker_as_list)
 
 # Import Stock random Data from Yahoo
 
 random_ticker = np.random.choice(ticker_as_list, 9, replace=False)
-#print(random_ticker)
 random_ticker_as_list = random_ticker.tolist()
 print(random_ticker_as_list)
 
@@ -58,41 +52,40 @@ SP500 = SP500[["Date", "Close", "Volume", "High", "Low", "Open", "Adj Close"]]
 SP500.reset_index(drop=True, inplace=True)
 
 pd.set_option('display.max_columns', None)
-#print(SP500.tail)
-#SP500.to_csv("S&P500.csv")
 
-#SP500 = pd.read_csv("S&P500.csv")
+column_header = (list(SP500.columns))
+
+
+#SP500.to_csv("S&P500_test.csv")
 
 # Normalize Data
-SP500.iloc[:,1] = SP500.iloc[:,1].apply(lambda x: x / abs(max(SP500.iloc[:,1])))
-SP500.iloc[:,2] = SP500.iloc[:,2].apply(lambda x: x / abs(max(SP500.iloc[:,2])))
-SP500.iloc[:,3] = SP500.iloc[:,3].apply(lambda x: x / abs(max(SP500.iloc[:,3])))
-SP500.iloc[:,4] = SP500.iloc[:,4].apply(lambda x: x / abs(max(SP500.iloc[:,4])))
-SP500.iloc[:,5] = SP500.iloc[:,5].apply(lambda x: x / abs(max(SP500.iloc[:,5])))
-SP500.iloc[:,6] = SP500.iloc[:,6].apply(lambda x: x / abs(max(SP500.iloc[:,6])))
-SP500.iloc[:,7] = SP500.iloc[:,7].apply(lambda x: x / abs(max(SP500.iloc[:,7])))
-SP500.iloc[:,8] = SP500.iloc[:,8].apply(lambda x: x / abs(max(SP500.iloc[:,8])))
-SP500.iloc[:,9] = SP500.iloc[:,9].apply(lambda x: x / abs(max(SP500.iloc[:,9])))
+#SP500.iloc[:,1] = SP500.iloc[:,1].apply(lambda x: (x - SP500.iloc[:,1].mean()) / SP500.iloc[:,1].std())
+#SP500.iloc[:,2] = SP500.iloc[:,2].apply(lambda x: (x - min(SP500.iloc[:,2]) / (max(SP500.iloc[:,2]) - min(SP500.iloc[:,2]))))
+#SP500.iloc[:,1] = SP500.iloc[:,1].apply(lambda x: x / abs(max(SP500.iloc[:,1])))
+#SP500.iloc[:,2] = SP500.iloc[:,2].apply(lambda x: x / abs(max(SP500.iloc[:,2])))
+#SP500.iloc[:,3] = SP500.iloc[:,3].apply(lambda x: x / abs(max(SP500.iloc[:,3])))
+#SP500.iloc[:,4] = SP500.iloc[:,4].apply(lambda x: x / abs(max(SP500.iloc[:,4])))
+#SP500.iloc[:,5] = SP500.iloc[:,5].apply(lambda x: x / abs(max(SP500.iloc[:,5])))
+#SP500.iloc[:,6] = SP500.iloc[:,6].apply(lambda x: x / abs(max(SP500.iloc[:,6])))
+#SP500.iloc[:,7] = SP500.iloc[:,7].apply(lambda x: x / abs(max(SP500.iloc[:,7])))
+#SP500.iloc[:,8] = SP500.iloc[:,8].apply(lambda x: x / abs(max(SP500.iloc[:,8])))
+#SP500.iloc[:,9] = SP500.iloc[:,9].apply(lambda x: x / abs(max(SP500.iloc[:,9])))
 
-#SP500_sklearn = SP500.copy()
-#SP500_sklearn[column] = MinMaxScaler().fit_transform(np.array(SP500_sklearn[column]).reshape(-1,1))
-
-#print(SP500.tail())
 
 # Visualization
 SP500.index = SP500.index.astype(str)
-column_header = (list(SP500.columns))
+
 p = figure(title = "S&P500 Example", x_axis_label = 'Time', x_axis_type="datetime", y_axis_label = 'Scaled Prices',width=800, tools='hover, pan, zoom_out, zoom_in, reset, crosshair')
 formatters={'x': 'datetime'}
 p.line(SP500.iloc[:,0], SP500.iloc[:,1], legend_label = str((column_header[1][1])), color ="red", line_width = 2)
 p.line(SP500.iloc[:,0], SP500.iloc[:,2], legend_label = str((column_header[2][1])), color ="green", line_width = 2)
 p.line(SP500.iloc[:,0], SP500.iloc[:,3], legend_label = str((column_header[3][1])), color ="blue", line_width = 2)
 p.line(SP500.iloc[:,0], SP500.iloc[:,4], legend_label = str((column_header[4][1])), color ="orange", line_width = 2)
-#p.line(SP500.iloc[:,0], SP500.iloc[:,5], legend_label = str((column_header[5][1])), line_width = 2)
-#p.line(SP500.iloc[:,0], SP500.iloc[:,6], legend_label = str((column_header[6][1])), line_width = 2)
-#p.line(SP500.iloc[:,0], SP500.iloc[:,7], legend_label = str((column_header[7][1])), line_width = 2)
-#p.line(SP500.iloc[:,0], SP500.iloc[:,8], legend_label = str((column_header[8][1])), line_width = 2)
-#p.line(SP500.iloc[:,0], SP500.iloc[:,9], legend_label = str((column_header[9][1])), line_width = 2)
+p.line(SP500.iloc[:,0], SP500.iloc[:,5], legend_label = str((column_header[5][1])), line_width = 2)
+p.line(SP500.iloc[:,0], SP500.iloc[:,6], legend_label = str((column_header[6][1])), line_width = 2)
+p.line(SP500.iloc[:,0], SP500.iloc[:,7], legend_label = str((column_header[7][1])), line_width = 2)
+p.line(SP500.iloc[:,0], SP500.iloc[:,8], legend_label = str((column_header[8][1])), line_width = 2)
+p.line(SP500.iloc[:,0], SP500.iloc[:,9], legend_label = str((column_header[9][1])), line_width = 2)
 p.xaxis.formatter=DatetimeTickFormatter(
         hours=["%d %B %Y"],
         days=["%d %B %Y"],
@@ -149,12 +142,7 @@ for n in range(1,10):
     n4 += 1
     n5 += 1
 
-SP500.to_csv("S&P500.csv")
 print(SP500)
-
-#Standard Deviation
-
-
-print(SP500.iloc[: , 82].std())
+print(abs(max(SP500.iloc[:,1])))
 
 
