@@ -64,4 +64,3 @@ SP500.to_csv('S&P500.csv')
 print(SP500.tail)
 
 
-

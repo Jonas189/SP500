@@ -31,7 +31,7 @@ s2 = s1.replace("'", "")
 s3 = s2.replace("[", "")
 s4 = s3.replace("]", "")
 Stock_names = s4.split(",")
-#print(len(Stock_names))
+print(len(Stock_names))
 
 # Create new Dataframe
 SP500_Analysis = pd.DataFrame(Stock_names, columns = ["Stocks"])
@@ -54,19 +54,19 @@ for i in range(0,len(Stock_names)):
 print(SP500_Analysis.min())
 print(SP500_Analysis.max())
 
-#Histogram Averages
 
-p = figure(width=670, height=400,
-           title="Average Stock Price Distribution")
-bins = np.linspace(SP500_Analysis.iloc[:,2].min(), SP500_Analysis.iloc[:,2].max(), 100)
-hist, edges = np.histogram(SP500_Analysis.iloc[:, 2], density=True, bins=bins)
-p.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:],
+#Histogram SD
+
+c = figure(width=670, height=400, toolbar_location=None,
+           title="Normal (Gaussian) Distribution")
+bins = np.linspace(SP500_Analysis.iloc[:,3].min(), SP500_Analysis.iloc[:,3].max(), 100)
+hist, edges = np.histogram(SP500_Analysis.iloc[:, 3], density=True, bins=bins)
+c.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:],
          fill_color="skyblue", line_color="white",
          legend_label="S&P 500 Stocks")
 
-p.y_range.start = 0
-p.xaxis.axis_label = "Average Stock Price (Normalized)"
-p.yaxis.axis_label = "Number of Stocks"
+c.y_range.start = 0
+c.xaxis.axis_label = "Standard Deviation"
+c.yaxis.axis_label = "Number of Stocks"
 
-show(p)
-
+show(c)
