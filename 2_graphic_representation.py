@@ -148,4 +148,3 @@ for n in range(1,10):
 print(SP500)
 print(abs(max(SP500.iloc[:,1])))
 
-

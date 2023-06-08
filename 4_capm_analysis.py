@@ -91,4 +91,3 @@ plt.grid()
 plt.ylabel('salary')
 plt.xlabel('roe')
 plt.show()
-
